@@ -97,8 +97,8 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/home/claude-user/scripts:/home/claude-user/.local/bin:${PATH}"
 ENV PYTHONPATH="/home/claude-user/scripts:${PYTHONPATH}"
 
-# Install MCP servers from configuration file
-RUN /app/install-mcp-servers.sh
+# Install MCP servers from configuration file (non-blocking - build continues even if some fail)
+RUN /app/install-mcp-servers.sh || echo "⚠️  Some MCP servers failed to install - continuing build..."
 
 # Configure git user during build using host git config passed as build args
 ARG GIT_USER_NAME=""
