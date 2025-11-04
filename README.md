@@ -62,11 +62,10 @@ See the complete Windows guide: **[README-WINDOWS.md](README-WINDOWS.md)**
 git clone https://github.com/VishalJ99/claude-docker.git
 cd claude-docker
 
-# 2. Setup environment
-copy .env.example .env
-notepad .env
+# 2. One-time setup (builds Docker image)
+setup-windows.bat
 
-# 3. Run the launcher
+# 3. Run Claude Docker
 start-claude-docker.bat
 ```
 ## Command Line Flags

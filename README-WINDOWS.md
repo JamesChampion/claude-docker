@@ -48,71 +48,69 @@ git config --global user.email "your.email@example.com"
 
 ## Quick Start
 
-### Option 1: Using Batch File (Easiest)
+### Step 1: One-Time Setup
 
-1. **Clone the repository**:
-   ```cmd
-   git clone https://github.com/VishalJ99/claude-docker.git
-   cd claude-docker
-   ```
+You need to run the setup script **once** to build the Docker image:
 
-2. **Create .env file**:
-   ```cmd
-   copy .env.example .env
-   notepad .env
-   ```
-   Edit the file with your API keys (optional - see Configuration section)
+**Using Batch File:**
+```cmd
+git clone https://github.com/VishalJ99/claude-docker.git
+cd claude-docker
+setup-windows.bat
+```
 
-3. **Run the batch file**:
-   ```cmd
-   start-claude-docker.bat
-   ```
+**Using PowerShell:**
+```powershell
+git clone https://github.com/VishalJ99/claude-docker.git
+cd claude-docker
+.\setup-windows.ps1
+```
 
-4. **Inside the container**:
-   ```bash
-   # Start Claude Code
-   claude
+**Note**: If you get an execution policy error in PowerShell, run:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
 
-   # When done, exit the container
-   exit
-   ```
+The setup script will:
+1. Check Docker is running
+2. Verify Claude Code authentication
+3. Copy authentication files to build context
+4. Create .env file (prompts you to edit it)
+5. Create persistent directories
+6. Build the Docker image (takes a few minutes first time)
 
-### Option 2: Using PowerShell Script
+### Step 2: Run Claude Docker
 
-1. **Clone the repository**:
-   ```powershell
-   git clone https://github.com/VishalJ99/claude-docker.git
-   cd claude-docker
-   ```
+After setup is complete, start Claude Docker:
 
-2. **Create .env file**:
-   ```powershell
-   Copy-Item .env.example .env
-   notepad .env
-   ```
+**Using Batch File:**
+```cmd
+start-claude-docker.bat
+```
 
-3. **Run the PowerShell script**:
-   ```powershell
-   .\start-claude-docker.ps1
-   ```
+**Using PowerShell:**
+```powershell
+.\start-claude-docker.ps1
+```
 
-   **Note**: If you get an execution policy error, run:
-   ```powershell
-   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-   ```
+**Using Docker Compose Directly:**
+```cmd
+# Set environment variables first
+set HOME=%USERPROFILE%
+set PROJECT_DIR=%CD%
 
-### Option 3: Using Docker Compose Directly
+# Start the container
+docker-compose run --rm claude-docker
+```
 
-1. **Set environment variables** (in PowerShell):
-   ```powershell
-   $env:PROJECT_DIR = "C:\path\to\your\project"
-   $env:HOME = $env:USERPROFILE
-   ```
+**Inside the container:**
+```bash
+# Start Claude Code
+claude
 
-2. **Start the container**:
-   ```powershell
-   docker-compose run --rm claude-docker
-   ```
+# When done, exit the container
+exit
+```
 
 ## Configuration
 
@@ -369,8 +367,10 @@ Both setups achieve the same result - the Windows version just uses Docker Compo
 1. ✅ Install Docker Desktop
 2. ✅ Authenticate Claude Code on Windows
 3. ✅ Clone this repository
-4. ✅ Configure .env file
+4. ✅ Run `setup-windows.bat` or `setup-windows.ps1` (one-time setup)
 5. ✅ Run `start-claude-docker.bat` or `start-claude-docker.ps1`
 6. ✅ Start coding with Claude!
+
+**Important**: After updating .env or changing system packages, run the setup script again to rebuild the image.
 
 Happy coding! 🚀

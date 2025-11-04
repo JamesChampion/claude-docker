@@ -16,6 +16,24 @@ if errorlevel 1 (
     exit /b 1
 )
 
+REM Check if the Docker image is built
+docker images -q claude-docker:latest >temp.txt 2>&1
+set /p IMAGE_ID=<temp.txt
+del temp.txt
+if "%IMAGE_ID%"=="" (
+    echo ERROR: Claude Docker image not found!
+    echo.
+    echo Please run the setup script first:
+    echo   setup-windows.bat
+    echo.
+    echo Or build manually:
+    echo   docker-compose build
+    echo.
+    pause
+    exit /b 1
+)
+echo Found Docker image: claude-docker:latest
+
 REM Create necessary directories
 if not exist "%USERPROFILE%\.claude-docker\claude-home" (
     echo Creating Claude home directory...

@@ -23,6 +23,22 @@ try {
     exit 1
 }
 
+# Check if the Docker image is built
+$imageId = docker images -q claude-docker:latest 2>$null
+if (-not $imageId) {
+    Write-Host "ERROR: Claude Docker image not found!" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Please run the setup script first:" -ForegroundColor Yellow
+    Write-Host "  .\setup-windows.ps1" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "Or build manually:" -ForegroundColor Yellow
+    Write-Host "  docker-compose build" -ForegroundColor Cyan
+    Write-Host ""
+    Read-Host "Press Enter to exit"
+    exit 1
+}
+Write-Host "Found Docker image: claude-docker:latest" -ForegroundColor Green
+
 # Define paths
 $claudeDockerHome = "$env:USERPROFILE\.claude-docker"
 $claudeHome = "$claudeDockerHome\claude-home"

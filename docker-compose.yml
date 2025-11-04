@@ -23,10 +23,14 @@ services:
       - CONDA_ENVS_DIRS=${CONDA_ENVS_DIRS:-}
       - CONDA_PKGS_DIRS=${CONDA_PKGS_DIRS:-}
     volumes:
-      # Mount your project directory - UPDATE THIS PATH for your project
+      # Mount your project directory
+      # On Windows: set PROJECT_DIR environment variable or use current directory
+      # On Linux/Mac: defaults to current directory
       - ${PROJECT_DIR:-.}:/workspace
 
       # Persistent Claude configuration
+      # Note: On Windows, the start scripts set HOME=%USERPROFILE%
+      # On Linux/Mac, HOME is already set correctly
       - ${HOME}/.claude-docker/claude-home:/home/claude-user/.claude:rw
 
       # SSH keys for git operations
@@ -54,6 +58,6 @@ services:
     #           count: all
     #           capabilities: [gpu]
 
-    # Override entrypoint for interactive shell
-    # Remove this line to use the default startup.sh entrypoint
+    # Interactive bash shell
+    # Change to ["/app/startup.sh"] to auto-start Claude Code
     command: /bin/bash
