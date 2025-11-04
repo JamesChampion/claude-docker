@@ -1,0 +1,24 @@
+# Ultra-minimal Dockerfile - just a base with Node.js
+FROM node:20-slim
+
+# Install system packages
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    python3 \
+    build-essential \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a user
+RUN deluser node 2>/dev/null || true && \
+    delgroup node 2>/dev/null || true && \
+    groupadd -g 1000 user && \
+    useradd -m -u 1000 -g user -s /bin/bash user && \
+    echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+USER user
+WORKDIR /workspace
+
+# That's it! Everything else happens at runtime
+CMD ["/bin/bash"]

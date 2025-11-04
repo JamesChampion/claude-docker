@@ -1,0 +1,27 @@
+services:
+  claude:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    image: claude-simple:latest
+    container_name: claude-simple
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+    volumes:
+      # Your project
+      - .:/workspace
+
+      # Mount Windows .claude directory
+      - ${USERPROFILE}/.claude:/home/user/.claude-from-windows:ro
+
+      # Persistent container .claude
+      - claude-data:/home/user/.claude
+
+    environment:
+      - HOME=/home/user
+
+    command: /bin/bash -c "bash /workspace/init-container.sh && exec bash"
+
+volumes:
+  claude-data:
