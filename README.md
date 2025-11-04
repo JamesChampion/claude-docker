@@ -52,21 +52,31 @@ claude-docker
 
 ### Windows
 
-**Windows users should use the Docker Compose setup** for best compatibility.
+**Two options for Windows users:**
 
-See the complete Windows guide: **[README-WINDOWS.md](README-WINDOWS.md)**
+#### Option 1: Simple Setup (Recommended) 🌟
 
-**Quick version:**
+The easiest way - just spin up a container and go!
+
+📖 **Guide**: [README-WINDOWS-SIMPLE.md](README-WINDOWS-SIMPLE.md)
+
 ```cmd
-# 1. Clone and enter directory
 git clone https://github.com/VishalJ99/claude-docker.git
 cd claude-docker
+run-windows.bat  # That's it!
+```
 
-# 2. One-time setup (builds Docker image)
-setup-windows.bat
+#### Option 2: Full Setup
 
-# 3. Run Claude Docker
-start-claude-docker.bat
+Complete setup with all features built into the image.
+
+📖 **Guide**: [README-WINDOWS.md](README-WINDOWS.md)
+
+```cmd
+git clone https://github.com/VishalJ99/claude-docker.git
+cd claude-docker
+setup-windows.bat        # One-time setup
+start-claude-docker.bat  # Run it
 ```
 ## Command Line Flags
 
