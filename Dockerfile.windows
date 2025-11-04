@@ -10,6 +10,10 @@ RUN apt-get update && apt-get install -y \
     sudo \
     && rm -rf /var/lib/apt/lists/*
 
+# Delete default node user/group if exists to avoid conflicts
+RUN deluser node || true
+RUN delgroup node || true
+
 # Create user with standard UID/GID
 RUN groupadd -g 1000 claude-user && \
     useradd -m -s /bin/bash -u 1000 -g claude-user claude-user && \
