@@ -4,6 +4,8 @@ A complete AI coding agent starter pack with Claude Code, pre-configured with es
 
 📋 **MCP Setup Guide**: See [MCP_SERVERS.md](MCP_SERVERS.md) for customizing or adding more MCP servers
 
+🪟 **Windows Users**: See [README-WINDOWS.md](README-WINDOWS.md) for Windows-specific setup using Docker Compose
+
 ## 🚀 AI Coding Agent Starter Pack
 
 This is a complete starter pack for autonomous AI development. 
@@ -20,6 +22,9 @@ This is a complete starter pack for autonomous AI development.
 - **Fully customizable** - Modify the can modify the files at `~/.claude-docker` for custom slash commands, settings and claude.md files.
 
 ## Quick Start
+
+### Linux / macOS
+
 ```bash
 # 0. Assumes you claude-code and docker already installed.
 
@@ -43,6 +48,26 @@ claude-docker
 #
 # Optional: Set up SSH keys for git push (see Prerequisites section)
 # The script will show setup instructions if keys are missing
+```
+
+### Windows
+
+**Windows users should use the Docker Compose setup** for best compatibility.
+
+See the complete Windows guide: **[README-WINDOWS.md](README-WINDOWS.md)**
+
+**Quick version:**
+```cmd
+# 1. Clone and enter directory
+git clone https://github.com/VishalJ99/claude-docker.git
+cd claude-docker
+
+# 2. Setup environment
+copy .env.example .env
+notepad .env
+
+# 3. Run the launcher
+start-claude-docker.bat
 ```
 ## Command Line Flags
 

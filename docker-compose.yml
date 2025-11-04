@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  claude-docker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
+        GIT_USER_NAME: ${GIT_USER_NAME:-"Your Name"}
+        GIT_USER_EMAIL: ${GIT_USER_EMAIL:-"your.email@example.com"}
+        SYSTEM_PACKAGES: ${SYSTEM_PACKAGES:-}
+    image: claude-docker:latest
+    container_name: claude-docker
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+    environment:
+      - CLAUDE_CONTINUE_FLAG=${CLAUDE_CONTINUE_FLAG:-}
+      - CONDA_PREFIX=${CONDA_PREFIX:-}
+      - CONDA_EXE=${CONDA_EXE:-}
+      - CONDA_ENVS_DIRS=${CONDA_ENVS_DIRS:-}
+      - CONDA_PKGS_DIRS=${CONDA_PKGS_DIRS:-}
+    volumes:
+      # Mount your project directory - UPDATE THIS PATH for your project
+      - ${PROJECT_DIR:-.}:/workspace
+
+      # Persistent Claude configuration
+      - ${HOME}/.claude-docker/claude-home:/home/claude-user/.claude:rw
+
+      # SSH keys for git operations
+      - ${HOME}/.claude-docker/ssh:/home/claude-user/.ssh:rw
+
+      # Shared scripts directory
+      - ${HOME}/.claude-docker/scripts:/home/claude-user/scripts:rw
+
+      # Optional: Mount conda directories if specified
+      # These are commented out by default - uncomment and configure in .env if needed
+      # - ${CONDA_PREFIX}:${CONDA_PREFIX}:ro
+
+    # Optional: Resource limits
+    # Uncomment and adjust as needed
+    # mem_limit: ${DOCKER_MEMORY_LIMIT:-8g}
+    # cpus: ${DOCKER_CPU_LIMIT:-4}
+
+    # Optional: GPU access (requires NVIDIA Docker)
+    # Uncomment if you need GPU support
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+    # Override entrypoint for interactive shell
+    # Remove this line to use the default startup.sh entrypoint
+    command: /bin/bash
