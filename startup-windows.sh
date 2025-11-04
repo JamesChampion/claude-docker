@@ -1,7 +1,8 @@
 #!/bin/bash
 # Startup script for Windows - handles permissions and setup inside container
 
-set -e
+# Don't use set -e so we continue even if some commands fail
+set -u
 
 echo "=================================="
 echo "Claude Docker - Container Startup"
@@ -10,13 +11,18 @@ echo ""
 
 # Fix permissions on mounted .claude directory
 echo "[1/4] Fixing permissions..."
-if [ -d /home/claude-user/.claude ]; then
-    # Make sure claude-user owns the .claude directory
-    sudo chown -R claude-user:claude-user /home/claude-user/.claude 2>/dev/null || true
-    # Create debug directory if it doesn't exist
-    mkdir -p /home/claude-user/.claude/debug
-    chmod -R 755 /home/claude-user/.claude
-fi
+# Create .claude directory if it doesn't exist
+mkdir -p /home/claude-user/.claude/debug
+
+# Try to fix ownership (may fail on some mount types, that's ok)
+sudo chown -R claude-user:claude-user /home/claude-user/.claude 2>/dev/null || echo "  (chown skipped - may not be needed)"
+
+# Make directories writable
+chmod -R 755 /home/claude-user/.claude 2>/dev/null || true
+
+# Ensure debug directory is definitely writable
+sudo chmod 777 /home/claude-user/.claude/debug 2>/dev/null || chmod 777 /home/claude-user/.claude/debug 2>/dev/null || true
+
 echo "✓ Permissions fixed"
 
 # Copy credentials from host mount if available
