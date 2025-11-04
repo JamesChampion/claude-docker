@@ -1,0 +1,28 @@
+services:
+  claude-docker:
+    build:
+      context: .
+      dockerfile: Dockerfile.windows
+    image: claude-docker-windows:latest
+    container_name: claude-docker
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+    volumes:
+      # Mount project directory
+      - ${PROJECT_DIR:-.}:/workspace
+
+      # Mount Claude home from Windows
+      - ${USERPROFILE}/.claude:/home/claude-user/.claude-host:ro
+
+      # Persistent container Claude config
+      - ${USERPROFILE}/.claude-docker/claude-home:/home/claude-user/.claude:rw
+
+      # SSH keys
+      - ${USERPROFILE}/.claude-docker/ssh:/home/claude-user/.ssh:rw
+
+      # Scripts
+      - ${USERPROFILE}/.claude-docker/scripts:/home/claude-user/scripts:rw
+
+    # Interactive bash shell
+    command: /bin/bash
