@@ -1,0 +1,31 @@
+services:
+  claude-docker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USER_UID: 1000
+        USER_GID: 1000
+    image: claude-docker:latest
+    container_name: claude-docker
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+    volumes:
+      # Mount project directory
+      - .:/workspace
+
+      # Mount persistent Claude home
+      - ${USERPROFILE}/.claude-docker/claude-home:/home/claude-user/.claude:rw
+
+      # Mount SSH keys
+      - ${USERPROFILE}/.claude-docker/ssh:/home/claude-user/.ssh:rw
+
+      # Mount scripts
+      - ${USERPROFILE}/.claude-docker/scripts:/home/claude-user/scripts:rw
+
+    environment:
+      - CLAUDE_CONTINUE_FLAG=${CLAUDE_CONTINUE_FLAG:-}
+
+    # Uses existing startup.sh from the image
+    # Already set as ENTRYPOINT in Dockerfile
