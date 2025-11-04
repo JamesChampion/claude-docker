@@ -1,0 +1,10 @@
+# Ensure shell scripts always use LF line endings (Unix style)
+# This prevents issues when building Docker images on Windows
+*.sh text eol=lf
+
+# Batch and PowerShell scripts should use CRLF (Windows style)
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Default behavior for other files
+* text=auto

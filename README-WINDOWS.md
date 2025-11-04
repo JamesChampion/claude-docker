@@ -245,6 +245,19 @@ docker-compose down
 
 **Solution**: Start Docker Desktop from the Start menu
 
+### Line Endings Error During Build
+
+**Error**: `/usr/bin/env: 'bash\r': No such file or directory`
+
+**Solution**: This happens when shell scripts have Windows line endings (CRLF) instead of Unix line endings (LF).
+
+**If you cloned BEFORE the .gitattributes fix was added:**
+1. Delete the repository directory
+2. Re-clone the repository (it will now have correct line endings)
+3. Run setup-windows.bat again
+
+**The fix is already in place** - the Dockerfile now automatically converts line endings during build, and `.gitattributes` ensures new clones use correct line endings.
+
 ### Path Issues
 
 **Error**: "Volume path is invalid"

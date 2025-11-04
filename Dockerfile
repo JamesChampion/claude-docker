@@ -54,9 +54,9 @@ ENV PATH="/usr/local/bin:${PATH}"
 # Create directories for configuration
 RUN mkdir -p /app/.claude /home/claude-user/.claude
 
-# Copy startup script
+# Copy startup script and convert line endings (in case cloned on Windows)
 COPY src/startup.sh /app/
-RUN chmod +x /app/startup.sh
+RUN sed -i 's/\r$//' /app/startup.sh && chmod +x /app/startup.sh
 
 # Copy .claude directory for runtime use
 COPY .claude /app/.claude
@@ -72,10 +72,10 @@ COPY .claude/CLAUDE.md /home/claude-user/.claude/CLAUDE.md
 # Note: These must exist - host must have authenticated Claude Code first
 COPY .claude.json /tmp/.claude.json
 
-# Copy MCP server configuration files (as root)
+# Copy MCP server configuration files (as root) and convert line endings
 COPY mcp-servers.txt /app/
 COPY install-mcp-servers.sh /app/
-RUN chmod +x /app/install-mcp-servers.sh
+RUN sed -i 's/\r$//' /app/install-mcp-servers.sh && chmod +x /app/install-mcp-servers.sh
 
 # Move auth files to proper location before switching user
 RUN cp /tmp/.claude.json /home/claude-user/.claude.json && \
