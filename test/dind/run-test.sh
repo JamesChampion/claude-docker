@@ -7,11 +7,23 @@ set -e
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
+# Convert Windows paths for Docker Desktop
+# Git Bash on Windows uses /a/, /c/, etc. which need to be converted to /a, /c for Docker
+if [[ "$REPO_ROOT" =~ ^/[a-z]/ ]]; then
+    # Convert /a/path/to/repo to //a/path/to/repo for Docker on Windows
+    # Docker Desktop expects double slash for drive letters
+    DOCKER_REPO_ROOT="/$REPO_ROOT"
+    echo "Detected Windows path, converting for Docker: $DOCKER_REPO_ROOT"
+else
+    DOCKER_REPO_ROOT="$REPO_ROOT"
+fi
+
 echo "========================================="
 echo "Docker-in-Docker Test Runner"
 echo "========================================="
 echo ""
 echo "Repository: $REPO_ROOT"
+echo "Docker path: $DOCKER_REPO_ROOT"
 echo "Test directory: $SCRIPT_DIR"
 echo ""
 
@@ -35,7 +47,7 @@ echo ""
 # Mount the repository as read-only at /repo
 docker run --rm \
     --privileged \
-    -v "$REPO_ROOT:/repo:ro" \
+    -v "$DOCKER_REPO_ROOT:/repo:ro" \
     --name claude-docker-dind-test \
     claude-docker-dind-test
 

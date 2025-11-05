@@ -19,6 +19,15 @@ if [ -d "/repo" ]; then
     echo "Copying claude-docker repository..."
     cp -r /repo /home/testuser/claude-docker
     cd /home/testuser/claude-docker
+
+    # Convert Windows line endings to Unix (fixes pipefail error)
+    echo "Converting line endings for Linux compatibility..."
+    find . -type f -name "*.sh" -exec dos2unix {} \; 2>/dev/null
+    find . -type f -name "*.md" -exec dos2unix {} \; 2>/dev/null
+
+    # Make scripts executable
+    chmod +x src/*.sh
+    echo "✓ Made scripts executable and converted line endings"
 else
     echo "ERROR: Repository not found at /repo"
     exit 1
@@ -74,7 +83,7 @@ echo "✓ Created mock Claude authentication files"
 # Step 4: Run the installation
 echo ""
 echo "Step 4: Running installation script..."
-bash ./src/install.sh
+./src/install.sh
 
 # Verify installation results
 echo ""
@@ -142,7 +151,7 @@ fi
 
 # Build the claude-docker image
 echo "Building claude-docker image (this may take a few minutes)..."
-bash ./src/claude-docker.sh --rebuild || {
+/bin/bash ./src/claude-docker.sh --rebuild || {
     echo "✗ ERROR: Docker build failed"
     exit 1
 }

@@ -13,7 +13,8 @@ RUN apk add --no-cache \
     zsh \
     sudo \
     openssh-client \
-    ca-certificates
+    ca-certificates \
+    dos2unix
 
 # Create a test user with sudo privileges
 RUN addgroup -g 1000 testuser && \

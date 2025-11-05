@@ -24,9 +24,15 @@ done
 echo "Docker daemon is ready!"
 docker info
 
+# Give testuser access to docker socket
+echo "Setting permissions on docker socket..."
+chmod 666 /var/run/docker.sock
+
 # Switch to testuser and run the test script
-echo "Running test script as testuser..."
-su - testuser -c "/home/testuser/test-setup.sh"
+# Note: Running as root to avoid docker socket permission issues in DinD
+echo "Running test script as root (DinD environment)..."
+cd /home/testuser
+/home/testuser/test-setup.sh
 
 # Keep container running if tests pass
 echo "Tests completed successfully!"
