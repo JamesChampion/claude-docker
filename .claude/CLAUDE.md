@@ -14,8 +14,7 @@ THESE RULES ARE ABSOLUTE AND APPLY AT ALL TIMES.
   - Only first session needs full initialization
 
 ### 1. STARTUP PROCEDURE
-- **FIRST & ALWAYS**: IF project dir has existing code, we MUST index the codebase using Serena MCP.
-  `uvx --from git+https://github.com/oraios/serena index-project`
+- Follow the **CONDITIONAL INITIALIZATION** protocol above - only initialize if `.serena/project.yml` doesn't exist
 
 ### 2. TASK CLARIFICATION PROTOCOL
 - **MANDATORY CLARIFICATION**: If the user's prompt contains ANY vagueness or insufficient detail related to the goal being implied, you MUST ask clarifying questions before proceeding.
