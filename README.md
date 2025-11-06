@@ -47,6 +47,46 @@ claude-docker
 # Optional: Set up SSH keys for git push (see Prerequisites section)
 # The script will show setup instructions if keys are missing
 ```
+
+## 🔄 Persistent Daemon Mode (NEW)
+
+By default, claude-docker now runs in **daemon mode** for optimal performance:
+
+### Benefits
+- **Zero startup overhead**: After first initialization, sessions start instantly
+- **Huge token savings**: Skips ~2,500 token reinitialization on every startup
+- **Persistent state**: Serena MCP state stays in memory between sessions
+- **Seamless workflow**: Detach and reattach without losing context
+
+### Usage
+```bash
+# First run: initializes and starts daemon
+claude-docker
+
+# Subsequent runs: instant attach to running daemon
+claude-docker
+
+# Check daemon status
+claude-docker --status
+
+# Stop daemon when done
+claude-docker --stop
+
+# Restart daemon (full reinitialization)
+claude-docker --restart
+
+# Use old ephemeral mode (for testing/debugging)
+claude-docker --once
+```
+
+### How It Works
+1. First `claude-docker` run creates a persistent container named `claude-docker-<project-name>`
+2. Container stays alive in background with Serena state in memory
+3. Subsequent runs instantly attach to the existing container
+4. Use `--stop` to shut down the daemon when you're done with the project
+
+**Note**: Each project directory gets its own daemon container for isolation.
+
 ## Command Line Flags
 
 Claude Docker supports several command-line flags for different use cases:
@@ -70,6 +110,10 @@ claude-docker --rebuild --no-cache  # Rebuild without using Docker cache
 | `--no-cache` | When rebuilding, don't use Docker cache | `claude-docker --rebuild --no-cache` |
 | `--memory` | Set container memory limit | `claude-docker --memory 8g` |
 | `--gpus` | Enable GPU access (requires nvidia-docker) | `claude-docker --gpus all` |
+| `--stop` | Stop the persistent daemon container | `claude-docker --stop` |
+| `--restart` | Restart the daemon container | `claude-docker --restart` |
+| `--status` | Check if daemon is running | `claude-docker --status` |
+| `--once` | Run in ephemeral mode (old behavior, no persistence) | `claude-docker --once` |
 
 ### Environment Variables
 You can also set defaults in your `.env` file:

@@ -11,6 +11,8 @@ FORCE_REBUILD=false
 CONTINUE_FLAG=""
 MEMORY_LIMIT=""
 GPU_ACCESS=""
+DAEMON_MODE=true  # Default to daemon mode
+COMMAND_MODE=""   # stop, restart, status, or empty for normal
 ARGS=()
 
 while [[ $# -gt 0 ]]; do
@@ -39,6 +41,22 @@ while [[ $# -gt 0 ]]; do
             GPU_ACCESS="$2"
             shift 2
             ;;
+        --once)
+            DAEMON_MODE=false
+            shift
+            ;;
+        --stop)
+            COMMAND_MODE="stop"
+            shift
+            ;;
+        --restart)
+            COMMAND_MODE="restart"
+            shift
+            ;;
+        --status)
+            COMMAND_MODE="status"
+            shift
+            ;;
         *)
             ARGS+=("$1")
             shift
@@ -50,6 +68,63 @@ done
 CURRENT_DIR=$(pwd)
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# Generate container name from project directory
+CONTAINER_NAME="claude-docker-$(basename "$CURRENT_DIR")"
+
+# Helper functions for daemon management
+check_container_running() {
+    "$DOCKER" ps -q -f name="$CONTAINER_NAME" 2>/dev/null | grep -q .
+}
+
+check_container_exists() {
+    "$DOCKER" ps -aq -f name="$CONTAINER_NAME" 2>/dev/null | grep -q .
+}
+
+stop_container() {
+    if check_container_exists; then
+        echo "Stopping Claude Docker daemon for $(basename "$CURRENT_DIR")..."
+        "$DOCKER" stop "$CONTAINER_NAME" >/dev/null 2>&1 || true
+        "$DOCKER" rm "$CONTAINER_NAME" >/dev/null 2>&1 || true
+        echo "✓ Daemon stopped"
+        return 0
+    else
+        echo "No daemon running for this project"
+        return 1
+    fi
+}
+
+get_container_status() {
+    if check_container_running; then
+        echo "✓ Claude Docker daemon is running for $(basename "$CURRENT_DIR")"
+        echo "  Container: $CONTAINER_NAME"
+        "$DOCKER" ps -f name="$CONTAINER_NAME" --format "table {{.Status}}\t{{.CreatedAt}}"
+        return 0
+    elif check_container_exists; then
+        echo "⚠️  Claude Docker daemon exists but is stopped for $(basename "$CURRENT_DIR")"
+        return 1
+    else
+        echo "No Claude Docker daemon for $(basename "$CURRENT_DIR")"
+        return 1
+    fi
+}
+
+# Handle command modes (stop, restart, status) early
+case "$COMMAND_MODE" in
+    stop)
+        stop_container
+        exit $?
+        ;;
+    restart)
+        stop_container
+        echo "Restarting daemon..."
+        # Continue to normal startup flow
+        ;;
+    status)
+        get_container_status
+        exit $?
+        ;;
+esac
 
 # Detect if running in WSL and find Windows home directory
 WINDOWS_HOME=""
@@ -316,16 +391,60 @@ else
 fi
 
 # Run Claude Code in Docker
-echo "Starting Claude Code in Docker..."
-"$DOCKER" run -it --rm \
-    $DOCKER_OPTS \
-    -v "$CURRENT_DIR:/workspace" \
-    -v "$HOME/.claude-docker/claude-home:/home/claude-user/.claude:rw" \
-    -v "$HOME/.claude-docker/ssh:/home/claude-user/.ssh:rw" \
-    -v "$HOME/.claude-docker/scripts:/home/claude-user/scripts:rw" \
-    $MOUNT_ARGS \
-    $ENV_ARGS \
-    -e CLAUDE_CONTINUE_FLAG="$CONTINUE_FLAG" \
-    --workdir /workspace \
-    --name "claude-docker-$(basename "$CURRENT_DIR")-$$" \
-    claude-docker:latest "${ARGS[@]}"
+if [ "$DAEMON_MODE" = true ]; then
+    # Daemon mode: persistent container
+    if check_container_running; then
+        echo "✓ Attaching to existing Claude Docker daemon..."
+        echo "  (Use 'claude-docker --stop' to stop the daemon)"
+        echo ""
+
+        # Attach to running container
+        "$DOCKER" exec -it "$CONTAINER_NAME" /bin/bash -c "cd /workspace && claude --dangerously-skip-permissions ${CONTINUE_FLAG} ${ARGS[*]}"
+    else
+        # Start new daemon container
+        echo "Starting Claude Docker daemon..."
+        echo "  (Use 'claude-docker --stop' to stop when done)"
+        echo ""
+
+        # Remove old stopped container if it exists
+        if check_container_exists; then
+            "$DOCKER" rm "$CONTAINER_NAME" >/dev/null 2>&1 || true
+        fi
+
+        # Start container in detached mode with sleep infinity to keep it alive
+        "$DOCKER" run -d \
+            $DOCKER_OPTS \
+            -v "$CURRENT_DIR:/workspace" \
+            -v "$HOME/.claude-docker/claude-home:/home/claude-user/.claude:rw" \
+            -v "$HOME/.claude-docker/ssh:/home/claude-user/.ssh:rw" \
+            -v "$HOME/.claude-docker/scripts:/home/claude-user/scripts:rw" \
+            $MOUNT_ARGS \
+            $ENV_ARGS \
+            -e CLAUDE_CONTINUE_FLAG="$CONTINUE_FLAG" \
+            --workdir /workspace \
+            --name "$CONTAINER_NAME" \
+            claude-docker:latest \
+            sleep infinity >/dev/null
+
+        echo "✓ Daemon started"
+        echo ""
+
+        # Now attach and run claude
+        "$DOCKER" exec -it "$CONTAINER_NAME" /bin/bash -c "cd /workspace && claude --dangerously-skip-permissions ${CONTINUE_FLAG} ${ARGS[*]}"
+    fi
+else
+    # Once mode: ephemeral container (original behavior)
+    echo "Starting Claude Code in ephemeral mode..."
+    "$DOCKER" run -it --rm \
+        $DOCKER_OPTS \
+        -v "$CURRENT_DIR:/workspace" \
+        -v "$HOME/.claude-docker/claude-home:/home/claude-user/.claude:rw" \
+        -v "$HOME/.claude-docker/ssh:/home/claude-user/.ssh:rw" \
+        -v "$HOME/.claude-docker/scripts:/home/claude-user/scripts:rw" \
+        $MOUNT_ARGS \
+        $ENV_ARGS \
+        -e CLAUDE_CONTINUE_FLAG="$CONTINUE_FLAG" \
+        --workdir /workspace \
+        --name "claude-docker-$(basename "$CURRENT_DIR")-$$" \
+        claude-docker:latest "${ARGS[@]}"
+fi

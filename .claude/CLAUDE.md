@@ -3,12 +3,15 @@ THESE RULES ARE ABSOLUTE AND APPLY AT ALL TIMES.
 
 ## General
 
-- **FIRST & ALWAYS**: On project initialization, MUST activate Serena MCP for semantic code navigation:
-  1. **Activate Serena Project**: Call `mcp__serena__activate_project` with project path (usually `/workspace`)
-  2. **Check Onboarding**: Call `mcp__serena__check_onboarding_performed` to verify indexing status
-  3. **Offer Onboarding**: If not yet performed, ask user if they want to run `mcp__serena__onboarding` to index the codebase
+- **CONDITIONAL INITIALIZATION**: On project initialization:
+  1. **Check if already initialized**: Look for `.serena/project.yml` in `/workspace`
+  2. **If NOT initialized**: Run `/project_init` to activate Serena and index codebase
+  3. **If already initialized**: Skip initialization (Serena state persists in daemon mode)
 
-- **AUTOMATIC EXECUTION**: Use the `/project_init` slash command to automate this startup sequence
+- **DAEMON MODE**: By default, claude-docker runs in persistent daemon mode where:
+  - Container stays alive between sessions (no reinitialization needed)
+  - Serena state persists in memory
+  - Only first session needs full initialization
 
 ### 1. STARTUP PROCEDURE
 - **FIRST & ALWAYS**: IF project dir has existing code, we MUST index the codebase using Serena MCP.
