@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     python3 \
     build-essential \
     sudo \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv (Astral) for Serena MCP (todo make this modular.)
@@ -24,8 +25,20 @@ RUN apt-get update && apt-get install -y \
 ARG SYSTEM_PACKAGES=""
 RUN if [ -n "$SYSTEM_PACKAGES" ]; then \
     echo "Installing additional system packages: $SYSTEM_PACKAGES" && \
-    apt-get update && \
-    apt-get install -y $SYSTEM_PACKAGES && \
+    # Add Microsoft repo for dotnet if needed
+    if echo "$SYSTEM_PACKAGES" | grep -q "dotnet"; then \
+        apt-get update && \
+        apt-get install -y wget apt-transport-https && \
+        wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O /tmp/packages-microsoft-prod.deb && \
+        dpkg -i /tmp/packages-microsoft-prod.deb && \
+        rm /tmp/packages-microsoft-prod.deb && \
+        apt-get update; \
+    fi && \
+    # Install packages (filter out 'uv' - handled separately)
+    FILTERED_PACKAGES=$(echo "$SYSTEM_PACKAGES" | tr ' ' '\n' | grep -v '^uv$' | tr '\n' ' ') && \
+    if [ -n "$FILTERED_PACKAGES" ]; then \
+        apt-get install -y $FILTERED_PACKAGES; \
+    fi && \
     rm -rf /var/lib/apt/lists/*; \
 else \
     echo "No additional system packages specified"; \

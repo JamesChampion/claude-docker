@@ -3,6 +3,13 @@ THESE RULES ARE ABSOLUTE AND APPLY AT ALL TIMES.
 
 ## General
 
+- **FIRST & ALWAYS**: On project initialization, MUST activate Serena MCP for semantic code navigation:
+  1. **Activate Serena Project**: Call `mcp__serena__activate_project` with project path (usually `/workspace`)
+  2. **Check Onboarding**: Call `mcp__serena__check_onboarding_performed` to verify indexing status
+  3. **Offer Onboarding**: If not yet performed, ask user if they want to run `mcp__serena__onboarding` to index the codebase
+
+- **AUTOMATIC EXECUTION**: Use the `/project_init` slash command to automate this startup sequence
+
 ### 1. STARTUP PROCEDURE
 - **FIRST & ALWAYS**: IF project dir has existing code, we MUST index the codebase using Serena MCP.
   `uvx --from git+https://github.com/oraios/serena index-project`

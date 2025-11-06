@@ -247,7 +247,7 @@ claude-docker
 ### Important Notes for WSL Users
 
 **Path Handling:**
-- All paths are automatically Unix-style in WSL (`/home/user/project` or `/mnt/c/Users/user/project`)
+- All paths are automatically Unix-style in WSL d(`/home/user/project` or `/mnt/c/Users/user/project`)
 - Docker Desktop WSL2 backend handles volume mounts transparently
 - Works from both WSL home directory (`/home/user/`) and Windows paths (`/mnt/c/Users/user/`)
 
